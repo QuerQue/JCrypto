@@ -1,0 +1,65 @@
+<project name="Encryptor" basedir="." default="main">
+
+    <property name="src.dir"     value="src"/>
+    <property name="build.dir"   value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="jar.dir"     value="${build.dir}/jar"/>
+
+    <property name="library.src.dir"     value="library-src"/>
+    <property name="library.build.dir"   value="library-build"/>
+    <property name="library.classes.dir" value="${library.build.dir}/classes"/>
+    <property name="library.jar.dir"     value="${library.build.dir}/jar"/>
+
+    <property name="main-class"  value="com.testerpackage.CryptoTester"/>
+
+    <path id="classpath">
+        <fileset dir="${basedir}" includes="forms_rt*.jar"/>
+        <fileset dir="${library.jar.dir}"  includes="${ant.project.name}Library.jar"/>
+    </path>
+
+    <target name="clean">
+        <delete dir="${build.dir}" failonerror="false"/>
+        <delete dir="${library.build.dir}" failonerror="false"/>
+        <delete dir="${library.jar.dir}" failonerror="false"/>
+    </target>
+
+    <target name="init" depends="clean">
+        <mkdir dir="${library.jar.dir}"/>
+        <mkdir dir="${library.classes.dir}"/>
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${jar.dir}"/>
+    </target>
+
+    <target name="compile-library" depends="init">
+        <javac srcdir="${library.src.dir}" destdir="${library.classes.dir}"/>
+    </target>
+
+    <target name="jar-library" depends="compile-library">
+        <jar destfile="${library.jar.dir}/${ant.project.name}Library.jar" basedir="${library.classes.dir}">
+        </jar>
+    </target>
+
+    <target name="compile">
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
+    </target>
+
+    <target name="jar" depends="compile">
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" depends="jar">
+        <java fork="true" classname="${main-class}">
+            <classpath>
+                <path refid="classpath"/>
+                <path location="${jar.dir}/${ant.project.name}.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="main" depends="jar-library,run"/>
+
+</project>
